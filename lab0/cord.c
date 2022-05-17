@@ -169,6 +169,20 @@ char cord_charat(const cord_t *R, size_t i) {
     return '\0';
 }
 
+static char *string_sub(const char *s, size_t lo, size_t hi) {
+    size_t n = strlen(s);
+    assert(lo <= hi && hi <= n);
+
+    size_t len = hi - lo + 1;
+    char *ret = xmalloc(len);
+    ret[len - 1] = '\0';
+
+    for (size_t i = lo, j = 0; i < hi; ++i, ++j)
+        ret[j] = s[i];
+
+    return ret;
+}
+
 /**
  * @brief Gets a substring of an existing cord
  *
@@ -181,5 +195,38 @@ char cord_charat(const cord_t *R, size_t i) {
  */
 const cord_t *cord_sub(const cord_t *R, size_t lo, size_t hi) {
     assert(lo <= hi && hi <= cord_length(R));
-    return NULL;
+    if (lo == hi)
+        return NULL;
+
+    if (lo == 0 && hi == R->len)
+        return R;
+
+    cord_t *p = (cord_t *)R;
+    if (lo == hi)
+        return cord_new("");
+
+    cord_t *left = (cord_t *)p->left;
+    cord_t *right = (cord_t *)p->right;
+
+    // 1. p is a leaf
+    if (!left && !right)
+        return cord_new(string_sub(p->data, lo, hi));
+
+    // 2. p is a non-leaf
+    cord_t *left_ret = NULL;
+    cord_t *right_ret = NULL;
+    if (left) {
+        if (lo < left->len) {
+            left_ret =
+                (cord_t *)cord_sub(left, lo, hi <= left->len ? hi : left->len);
+        }
+
+        // indices for the right child
+        lo = lo > left->len ? lo - left->len : 0;
+        hi = hi > left->len ? hi - left->len : 0;
+    }
+    if (right)
+        right_ret = (cord_t *)cord_sub(right, lo, hi); // NULL if [0,0)
+
+    return cord_join(left_ret, right_ret);
 }

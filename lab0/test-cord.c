@@ -58,5 +58,14 @@ int main(int argc, char **argv) {
         assert(charat == 't');
     }
 
+    {
+        const cord_t *R1 = cord_join(cord_new("t"), cord_new("otally"));
+        const cord_t *R2 = cord_join(cord_new("e"), cord_new("fficient"));
+        const cord_t *c = cord_join(R1, R2);
+
+        const cord_t *res = cord_sub(c, 1, 16);
+        printf("%s\n", cord_tostring(res));
+    }
+
     return 0;
 }
