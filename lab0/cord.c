@@ -114,8 +114,20 @@ const cord_t *cord_join(const cord_t *R, const cord_t *S) {
  * @return
  */
 char *cord_tostring(const cord_t *R) {
-    // printf("cord_tostring\n");
-    char *result = malloc(cord_length(R) + 1);
+    if (!R) {
+        char *result = xmalloc(1);
+        result[1] = '\0';
+        return result;
+    }
+
+    if (!R->left && !R->right) {
+        return (char *)R->data;
+    }
+
+    char *result = xmalloc(cord_length(R) + 1);
+    result[0] = '\0';
+    strcat(result, cord_tostring(R->left));
+    strcat(result, cord_tostring(R->right));
     return result;
 }
 
@@ -129,12 +141,32 @@ char *cord_tostring(const cord_t *R) {
  * @requires i is a valid position in the cord R
  */
 char cord_charat(const cord_t *R, size_t i) {
-    assert(i <= cord_length(R));
+    cord_t *p = (cord_t *)R;
+    while (true) {
+        assert(i <= p->len);
 
-    char ret = '\0';
-    // while (R->left || R->right) {
-    // }
-    return ret;
+        if (i == R->len)
+            return '\0';
+
+        cord_t *left = (cord_t *)p->left;
+        cord_t *right = (cord_t *)p->right;
+
+        // 1. p is a leaf
+        if (!left && !right)
+            return p->data[i];
+
+        // 2. p is a non-leaf
+        if (left) {
+            if (i < left->len) {
+                p = (cord_t *)p->left;
+                continue;
+            } else
+                i -= left->len;
+        }
+        if (right)
+            p = (cord_t *)p->right;
+    }
+    return '\0';
 }
 
 /**
