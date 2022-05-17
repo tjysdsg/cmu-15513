@@ -1,0 +1,253 @@
+#! /usr/bin/env python3
+# cords grader
+# based on gradeC0.py by Daniel Santoro, James Komianos, et al
+# overhauled for python 3 by Zack Weinberg, 2022
+
+import json
+import os
+import signal
+import subprocess
+import sys
+import textwrap
+
+
+def report_CPE(e):
+    """Convert a CalledProcessError (or any other object with a
+       .returncode attribute whose value has the same meaning) into
+       a short human-readable explanation of why the process failed
+       (much shorter than str(e) would).
+    """
+    if e.returncode == 0:
+        return "success"
+    elif e.returncode > 0:
+        return "exit %d" % e.returncode
+    else:
+        # Python doesn't give us strsignal(), but working out the SIGxxxx
+        # name from the number isn't _that_ bad.  signal.Signals appears
+        # to have been added in 3.5.
+        signo = -e.returncode
+        if signo > signal.SIGRTMAX:
+            # this should be impossible, but let's handle it cleanly anyway
+            return "killed by signal #%d" % signo
+        elif signo >= signal.SIGRTMIN:
+            return "killed by signal #RTMIN+%d" % (signo - signal.SIGRTMIN)
+        else:
+            try:
+                return "killed by %s" % signal.Signals(signo).name
+            except (ValueError, AttributeError):
+                return "killed by signal #%d" % signo
+
+
+def dump_output(result):
+    """Given a CalledProcessError or CompletedProcess, dump all of the
+       captured stdout and stderr output to our own stdout, clearly
+       indicating which is which.
+    """
+    if result.stdout:
+        sys.stdout.write("[stdout:\n")
+        for line in result.stdout.splitlines():
+            sys.stdout.write("| " + line.rstrip() + "\n")
+        sys.stdout.write("]\n")
+    if result.stdout:
+        sys.stdout.write("[stdout:\n")
+        for line in result.stdout.splitlines():
+            sys.stdout.write("| " + line.rstrip() + "\n")
+        sys.stdout.write("]\n")
+    if result.stderr:
+        sys.stdout.write("[stderr:\n")
+        for line in result.stderr.splitlines():
+            sys.stdout.write("| " + line.rstrip() + "\n")
+        sys.stdout.write("]\n")
+
+
+def maybe_show_hint(hint):
+    """If HINT is not None, word-wrap it and print it."""
+    if hint is None:
+        return
+    for line in textwrap.wrap(hint, width=76,
+                              initial_indent="*** Hint: ",
+                              subsequent_indent="***       "):
+        sys.stdout.write(line + "\n")
+
+
+def test_cmd(cmd, hint=None, timeout=5):
+    """Perform one test, by running argument vector CMD in a
+       subprocess.  It is assumed that CMD[0] refers to an executable
+       in the current working directory.  If CMD exits successfully,
+       the test passed; otherwise, it failed.  In either case, all
+       stdout and stderr output from CMD will be logged.
+
+       If HINT is not None, it will be printed if the test fails.
+
+       If TIMEOUT is not None, CMD will be killed if it takes longer
+       than TIMEOUT seconds to run (and the test will be considered
+       to have failed).
+    """
+
+    # To avoid having to write "./grade-" over and over again in the
+    # tables.
+    if os.path.exists(cmd[0]):
+        cmd[0] = "./" + cmd[0]
+    elif os.path.exists("grade-" + cmd[0]):
+        cmd[0] = "./grade-" + cmd[0]
+
+    # Announce test
+    sys.stdout.write("Test '" + " ".join(cmd) + "'... ")
+    sys.stdout.flush()
+
+    try:
+        result = subprocess.run(
+            cmd,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=timeout,
+            check=True,
+            encoding="ascii",
+            errors="backslashescape",
+        )
+        sys.stdout.write("ok\n")
+        dump_output(result)
+        sys.stdout.flush()
+        return True
+
+    except subprocess.CalledProcessError as e:
+        sys.stdout.write("FAIL: " + report_CPE(e) + "\n")
+        dump_output(e)
+        maybe_show_hint(hint)
+        sys.stdout.flush()
+        return False
+
+    except subprocess.TimeoutExpired:
+        sys.stdout.write("FAIL: timeout expired\n")
+        maybe_show_hint(hint)
+        sys.stdout.flush()
+        return False
+
+
+def test_group(cmds, seqno, label):
+    """Run a group of tests identified by SEQNO and LABEL.
+       CMDS is an array of 3-tuples (score, command, hint).
+       For each of these, SCORE is the number of points scored
+       for a successful execution of COMMAND, and HINT is the
+       hint text to print if COMMAND does not succeed.
+
+       Returns a 2-tuple (points-scored, points-possible).
+    """
+    sys.stdout.write(
+        "==================================================\n"
+        "Testing Task %s (%s)\n" % (seqno, label)
+    )
+
+    points_scored = 0.0
+    points_possible = 0.0
+    for score, command, hint in cmds:
+        points_possible += score
+        if test_cmd(command, hint):
+            points_scored += score
+
+    return (points_scored, points_possible)
+
+
+def test_all(groups, for_autograder=False):
+    """Run all of the test groups defined for this exercise.
+       GROUPS is an array of 2-tuples (label, cmds) where LABEL
+       is the label to use in the test log, and CMDS is the set
+       of commands to run (see test_group).
+       
+       If FOR_AUTOGRADER is true, dump out a JSON score report
+       in the format expected by Autolab, after all other output.
+       (Note: As of 2022-05-16, this score report must be the
+       very last line in the Autolab log, and *not* followed by
+       a trailing newline, to be processed.)
+    """
+    scores_by_seqno = []
+    scores_by_group = {}
+    total_score = 0.0
+    total_possible = 0.0
+
+    for seqno_m1, (label, cmds) in enumerate(groups):
+        scored, possible = test_group(cmds, seqno_m1 + 1, label)
+        total_score += scored
+        total_possible += possible
+        scores_by_group[label] = scored
+        scores_by_seqno.append((scored, possible))
+
+    sys.stdout.write("==================================================\n")
+    for seqno_m1, (scored, possible) in enumerate(scores_by_seqno):
+        sys.stdout.write(
+            "Task %d: %.1f/%.1f\n" % (seqno_m1 + 1, scored, possible)
+        )
+    sys.stdout.write(
+        "TOTAL:  %.1f/%.1f\n\n" % (total_score, total_possible)
+    )
+    sys.stdout.flush()
+
+    if for_autograder:
+        score_report = {
+            "scores": scores_by_group,
+            "scoreboard": [total_score]
+        }
+        json.dump(score_report, sys.stdout, sort_keys=True)
+	# bug in Autolab, see docstring for details
+        #sys.stdout.write("\n")
+        sys.stdout.flush()
+
+    return total_score == total_possible
+
+
+def main():
+    iscord_tests = [
+        (1, ["iscord", "simplecords"], "Lots of medium-sized, valid cords."),
+        (1, ["iscord", "edge"], "Lots of little edge cases."),
+        (1, ["iscord", "example"],
+         "The 'happy birthday!' handout example, plus a half-dozen "
+         "invalid-cord variations."),
+        (1, ["iscord", "circular"],
+         "Cords that are invalid due to circularity. If you're only "
+         "missing this part, you should move on and come back to it. "
+         "Also, a 'killed by SIGSEGV' result might be due to "
+         "infinite recursion."),
+    ]
+    basic_tests = [
+        (2, ["basic", "new"], "Tests of cord_new."),
+        (2, ["basic", "length"], "Tests of cord_length."),
+        (2, ["basic", "join"], "Tests of cord_join."),
+        (1, ["basic", "huge"],
+         "Tests of cord_new, cord_length, cord_join with very large cords."),
+    ]
+    rec_tests = [
+        (1, ["rec", "charat"], "Tests of cord_charat."),
+        (1, ["rec", "charat-huge"],
+         "Tests of cord_charat with very large cords."),
+        (2, ["rec", "tostring"], "Tests of cord_tostring."),
+    ]
+    sub_tests = [
+        (1.0, ["sub", "simple"],
+         "cord_sub correctness checks (should work like string_sub)"),
+        (1.5, ["sub", "edge"], "cord_sub edge cases"),
+        (1.5, ["sub", "noalloc"], "subcords that require no allocation"),
+        (1.5, ["sub", "noshare"], "subcords that allow no sharing"),
+        (1.5, ["sub", "someshare"],
+         "subcords w/ partial sharing, like the handout example"),
+    ]
+    student_tests = [
+        (1.0, ["test-cord"], None),
+    ]
+
+    for_autograder = (len(sys.argv) >= 2 and sys.argv[1] == '-A')
+
+    if test_all([
+            ("iscord", iscord_tests),
+            ("basic", basic_tests),
+            ("rec", rec_tests),
+            ("sub", sub_tests),
+            ("student", student_tests),
+    ], for_autograder):
+        sys.exit(0)
+    else:
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

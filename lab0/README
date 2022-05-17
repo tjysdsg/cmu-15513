@@ -1,0 +1,51 @@
+15-513 Lab 0: Cords
+-------------------
+
+The purpose of this lab is to give you a refresher on the style of
+programming you will need to be able to do proficiently for this
+class, especially for the later assignments.  The material covered
+*should* all be review for you.
+
+You will be implementing a data structure known as “cords,” a
+generalization of strings that provides constant-time concatenation.
+See the writeup (cordlab.pdf) for the full specification you are to
+implement.
+
+For this lab, you will only *need* to modify cord.c.  You may find it
+useful to write tests for the API you are implementing; put these in
+test-cord.c.  If you like, you may modify .clang-format so that “make
+format” applies your preferred style.
+
+Don’t modify any other files!  If you do, the autograder will ignore
+those modifications and your code probably won’t compile.
+
+To compile and test your code locally:
+
+    shark$ make
+    shark$ ./grade-cordlab
+
+The program ‘grade-cordlab’ runs your tests (from test-cord.c) and
+also runs the same set of tests that the autograder will.  Note that
+you have NOT been provided the source code for these additional tests!
+If a test fails, you will see an error message like this:
+
+    Test './grade-sub edge'... FAIL: killed by SIGSEGV
+    *** Hint: cord_sub edge cases
+
+The hint tells you something about what might be wrong, and you can
+use gdb on the command shown (“./grade-sub edge” in this case) to
+investigate, but you will have to work out what the bug is for
+yourself.
+
+To submit your code to Autolab:
+
+    shark$ make format
+    shark$ make submit
+
+You must submit your code to Autolab to receive credit for this
+assignment!  Passing the tests locally is not enough.
+
+After running “make submit”, always check on the Autolab website
+(https://autolab.andrew.cmu.edu/) to make sure you have received
+the grade you expect.  In future labs, the autograder may do
+additional or more stringent tests than what you can run locally.

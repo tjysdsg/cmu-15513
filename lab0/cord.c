@@ -9,6 +9,7 @@
 
 #include <assert.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -25,17 +26,18 @@
  * @return
  */
 bool is_cord(const cord_t *R) {
+    // printf("is_cord\n");
     // 1. NULL
-    if (NULL == R)
+    if (!R)
         return true;
 
     // 2. leaf
-    if (NULL == R->left && NULL == R->right && NULL != R->data && R->len > 0 &&
+    if (!R->left && !R->right && R->data && R->len > 0 &&
         strlen(R->data) == R->len)
         return true;
 
     // 3. concat node
-    if (NULL != R->left && NULL != R->right && // and!
+    if (R->left && R->right && // and!
         R->len > 0 && R->len == R->left->len + R->right->len) {
         return is_cord(R->left) && is_cord(R->right);
     }
@@ -51,7 +53,10 @@ bool is_cord(const cord_t *R) {
  * @return
  */
 size_t cord_length(const cord_t *R) {
-    return 0;
+    // printf("cord_length\n");
+    if (!R)
+        return 0;
+    return R->len;
 }
 
 /**
@@ -60,7 +65,17 @@ size_t cord_length(const cord_t *R) {
  * @return
  */
 const cord_t *cord_new(const char *s) {
-    return NULL;
+    // printf("cord_new: %s\n", s);
+    size_t len = 0;
+    if (!s || !(len = strlen(s)))
+        return NULL;
+
+    cord_t *ret = xmalloc(sizeof(cord_t));
+    ret->data = s;
+    ret->len = len;
+    ret->left = NULL;
+    ret->right = NULL;
+    return ret;
 }
 
 /**
@@ -70,7 +85,27 @@ const cord_t *cord_new(const char *s) {
  * @return
  */
 const cord_t *cord_join(const cord_t *R, const cord_t *S) {
-    return NULL;
+    // printf("cord_join\n");
+    if (!R && !S) {
+        return NULL;
+    }
+
+    if (!R)
+        return S;
+    if (!S)
+        return R;
+
+    size_t len = R->len + S->len;
+    if (len < R->len || len < S->len) { // overflow
+        return NULL;
+    }
+
+    cord_t *ret = xmalloc(sizeof(cord_t));
+    ret->data = NULL;
+    ret->len = len;
+    ret->left = R;
+    ret->right = S;
+    return ret;
 }
 
 /**
@@ -79,6 +114,7 @@ const cord_t *cord_join(const cord_t *R, const cord_t *S) {
  * @return
  */
 char *cord_tostring(const cord_t *R) {
+    // printf("cord_tostring\n");
     char *result = malloc(cord_length(R) + 1);
     return result;
 }
@@ -94,7 +130,11 @@ char *cord_tostring(const cord_t *R) {
  */
 char cord_charat(const cord_t *R, size_t i) {
     assert(i <= cord_length(R));
-    return '\0';
+
+    char ret = '\0';
+    // while (R->left || R->right) {
+    // }
+    return ret;
 }
 
 /**
