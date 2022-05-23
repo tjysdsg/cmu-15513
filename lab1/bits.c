@@ -264,10 +264,21 @@ long integerLog2(long x) {
  *    trueThreeFourths(11L) = 8
  *    trueThreeFourths(-9L) = -6
  *    trueThreeFourths(4611686018427387904L) = 3458764513820540928L (no
- * overflow) Legal ops: ! ~ & ^ | + << >> Max ops: 20 Rating: 4
+ * overflow) Legal ops: ! ~ & ^ | + << >>
+ * Max ops: 20
+ * Rating: 4
  */
 long trueThreeFourths(long x) {
-    return 2;
+    // dividePower2(x, 2) but round towards infinity
+    long a = x >> 2;
+    long mask = 3;                       // 0b11, mask of remaining bits
+    long sign = x >> 63;                 // all zeros or all ones
+    long should_add1 = mask & x & ~sign; // b & x check if there is remain
+
+    // printf("should_add1: %ld\n", should_add1);
+
+    long divide_by4 = a + !!should_add1;
+    return x + ~divide_by4 + 1;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
