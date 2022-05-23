@@ -143,7 +143,9 @@ long bitMatch(long x, long y) {
  *   Rating: 2
  */
 long leastBitPos(long x) {
-    return 2;
+    long a = ~x + 1; // least sig bit becomes 1, bits below it are all 0, bits
+                     // above it are all inverted
+    return a & x;
 }
 /*
  * dividePower2 - Compute x/(2^n), for 0 <= n <= 62
