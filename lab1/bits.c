@@ -1,7 +1,7 @@
 /*
  * CS:APP Data Lab
  *
- * <Please put your name and userid here>
+ * @author Jiyang Tang <jiyangta@andrew.cmu.edu>
  *
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
@@ -124,7 +124,14 @@ extern int printf(const char *, ...);
  *   Rating: 1
  */
 long bitMatch(long x, long y) {
-    return 2L;
+    // long a = x & y; // match 1s
+    // long b = ~x & ~y; // match 0s
+    // return ~(~a & ~b); // a | b
+
+    // inversion of xor
+    long a = x & ~y;
+    long b = ~x & y;
+    return ~a & ~b;
 }
 // 2
 /*
