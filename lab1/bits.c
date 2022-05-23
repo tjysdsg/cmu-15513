@@ -173,7 +173,8 @@ long dividePower2(long x, long n) {
  *   Rating: 2
  */
 long implication(long x, long y) {
-    return 2L;
+    long ret = y | !x; // equivalent: x -> y <=> not(x) | y
+    return ret; // no need to use !!
 }
 /*
  * oddBits - return word with all odd-numbered bits set to 1
