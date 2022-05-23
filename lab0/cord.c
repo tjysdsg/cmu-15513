@@ -116,7 +116,7 @@ const cord_t *cord_join(const cord_t *R, const cord_t *S) {
 char *cord_tostring(const cord_t *R) {
     if (!R) {
         char *result = xmalloc(1);
-        result[1] = '\0';
+        result[0] = '\0';
         return result;
     }
 
