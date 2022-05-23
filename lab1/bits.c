@@ -174,7 +174,7 @@ long dividePower2(long x, long n) {
  */
 long implication(long x, long y) {
     long ret = y | !x; // equivalent: x -> y <=> not(x) | y
-    return ret; // no need to use !!
+    return ret;        // no need to use !!
 }
 /*
  * oddBits - return word with all odd-numbered bits set to 1
@@ -183,7 +183,11 @@ long implication(long x, long y) {
  *   Rating: 2
  */
 long oddBits(void) {
-    return 2;
+    long a = 0xAA; // 0b10101010
+    a = a | a << 8;
+    a = a | a << 16;
+    a = a | a << 32;
+    return a;
 }
 // 3
 /*
