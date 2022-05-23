@@ -158,8 +158,8 @@ long leastBitPos(long x) {
 long dividePower2(long x, long n) {
     long a = x >> n;
     long two_n = 1L << n;
-    long b = two_n + ~0; // all bits below n-th position is 1, others 0
-    long sign = x >> 63; // all zeros or all ones
+    long b = two_n + ~0L; // all bits below n-th position is 1, others 0
+    long sign = x >> 63;  // all zeros or all ones
     long should_add1 = b & x & sign; // b & x check if there is remain
     return a + !!should_add1;
 }
@@ -200,7 +200,15 @@ long oddBits(void) {
  *   Rating: 3
  */
 long rotateLeft(long x, long n) {
-    return 2;
+    // mask for bits that need to be moved
+    long mask = 1L << n;
+    mask = mask + ~0L;
+
+    long n_lo_bits = ~n + 65;
+    long remain = x >> n_lo_bits;
+    remain = remain & mask;
+    x = x << n;
+    return x + remain;
 }
 /*
  * isLess - if x < y  then return 1, else return 0
