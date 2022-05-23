@@ -218,7 +218,22 @@ long rotateLeft(long x, long n) {
  *   Rating: 3
  */
 long isLess(long x, long y) {
-    return 2L;
+    long sub = ~x + 1 + y; // y - x
+
+    long sign_sub = sub >> 63;
+    long nsign_sub = ~sign_sub;
+    long sign_x = x >> 63;
+    long sign_y = y >> 63;
+    long nsign_y = ~sign_y;
+
+    // long overflow1 = ~sign_x & sign_y & nsign_sub;
+    long noverflow1 = sign_x | nsign_y | sign_sub;
+    long overflow2 = sign_x & nsign_y & sign_sub;
+    // long ret = sub & nsign_sub & ~overflow1;
+    long ret = sub & nsign_sub & noverflow1;
+
+    ret = ret | overflow2;
+    return !!ret;
 }
 // 4
 /*
