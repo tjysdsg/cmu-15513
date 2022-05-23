@@ -156,7 +156,12 @@ long leastBitPos(long x) {
  *   Rating: 2
  */
 long dividePower2(long x, long n) {
-    return 2L;
+    long a = x >> n;
+    long two_n = 1L << n;
+    long b = two_n + ~0; // all bits below n-th position is 1, others 0
+    long sign = x >> 63; // all zeros or all ones
+    long should_add1 = b & x & sign; // b & x check if there is remain
+    return a + !!should_add1;
 }
 /*
  * implication - return x -> y in propositional logic - 0 for false, 1
