@@ -346,7 +346,32 @@ int floatIsEqual(unsigned uf, unsigned ug) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-    return 2;
+    int sign_mask = 0x80000000;
+    int frac_mask = 0X7FFFFF;
+    int expo_mask = 0x7F800000;
+    int frac_expo_mask = 0x7FFFFFFF;
+
+    int sign = uf & sign_mask;
+    int expo = uf & expo_mask;
+    int frac = uf & frac_mask;
+
+    // +-0
+    if (!(uf & frac_expo_mask))
+        return uf;
+
+    // inf or nan
+    if (expo == expo_mask)
+        return uf;
+
+    if (expo) {           // normalized
+        expo += 0x800000; // add one to 23th bit
+
+        if (expo == expo_mask) // 2*f = inf
+            frac = 0;
+    } else
+        frac *= 2;
+
+    return expo | sign | frac;
 }
 /*
  * floatUnsigned2Float - Return bit-level equivalent of expression (float) u
