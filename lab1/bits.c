@@ -113,7 +113,6 @@ CAUTION:
 
 extern int printf(const char *, ...);
 
-/* Edit the functions below.  Good luck!  */
 // 1
 /*
  * bitMatch - Create mask indicating which bits in x match those in y
@@ -133,6 +132,7 @@ long bitMatch(long x, long y) {
     long b = ~x & y;
     return ~a & ~b;
 }
+
 // 2
 /*
  * leastBitPos - return a mask that marks the position of the
@@ -147,6 +147,7 @@ long leastBitPos(long x) {
                      // above it are all inverted
     return a & x;
 }
+
 /*
  * dividePower2 - Compute x/(2^n), for 0 <= n <= 62
  *  Round toward zero
@@ -157,12 +158,12 @@ long leastBitPos(long x) {
  */
 long dividePower2(long x, long n) {
     long a = x >> n;
-    long two_n = 1L << n;
-    long b = two_n + ~0L; // all bits below n-th position is 1, others 0
-    long sign = x >> 63;  // all zeros or all ones
+    long b = (1L << n) + ~0L; // all bits below n-th position is 1, others 0
+    long sign = x >> 63;      // all zeros or all ones
     long should_add1 = b & x & sign; // b & x check if there is remain
     return a + !!should_add1;
 }
+
 /*
  * implication - return x -> y in propositional logic - 0 for false, 1
  * for true
@@ -173,9 +174,10 @@ long dividePower2(long x, long n) {
  *   Rating: 2
  */
 long implication(long x, long y) {
-    long ret = y | !x; // equivalent: x -> y <=> not(x) | y
-    return ret;        // no need to use !!
+    // equivalent: x -> y <=> not(x) | y
+    return y | !x;
 }
+
 /*
  * oddBits - return word with all odd-numbered bits set to 1
  *   Legal ops: ! ~ & ^ | + << >>
@@ -184,11 +186,12 @@ long implication(long x, long y) {
  */
 long oddBits(void) {
     long a = 0xAA; // 0b10101010
-    a = a | a << 8;
-    a = a | a << 16;
-    a = a | a << 32;
+    a |= a << 8;
+    a |= a << 16;
+    a |= a << 32;
     return a;
 }
+
 // 3
 /*
  * rotateLeft - Rotate x to the left by n
@@ -201,15 +204,14 @@ long oddBits(void) {
  */
 long rotateLeft(long x, long n) {
     // mask for bits that need to be moved
-    long mask = 1L << n;
-    mask = mask + ~0L;
+    long mask = (1L << n) + ~0L;
 
     long n_lo_bits = ~n + 65;
-    long remain = x >> n_lo_bits;
-    remain = remain & mask;
+    long remain = (x >> n_lo_bits) & mask;
     x = x << n;
     return x + remain;
 }
+
 /*
  * isLess - if x < y  then return 1, else return 0
  *   Example: isLess(4L,5L) = 1L.
@@ -232,9 +234,10 @@ long isLess(long x, long y) {
     // long ret = sub & nsign_sub & ~overflow1;
     long ret = sub & nsign_sub & noverflow1;
 
-    ret = ret | overflow2;
+    ret |= overflow2;
     return !!ret;
 }
+
 // 4
 /*
  * leftBitCount - returns count of number of consective 1's in
@@ -247,6 +250,7 @@ long isLess(long x, long y) {
 long leftBitCount(long x) {
     return 2L;
 }
+
 /*
  * integerLog2 - return floor(log base 2 of x), where x > 0
  *   Example: integerLog2(16L) = 4L, integerLog2(31L) = 4L
@@ -262,7 +266,7 @@ long integerLog2(long x) {
     long mask1 = (0xFFL << 56) | // 0xFFFFFFFF00000000L
                  (0xFFL << 48) | (0xFFL << 40) | (0xFFL << 32);
     long mask2 = (0xFFL << 24) | (0xFFL << 16); // 0xFFFF0000
-    long mask3 = 0xFFL << 8; // 0xFF00
+    long mask3 = 0xFFL << 8;                    // 0xFF00
 
     in_range = !!(x & mask1);
     n_bits = in_range << 5;
