@@ -308,15 +308,14 @@ long howManyBits(long x) {
  *   Rating: 2
  */
 int floatIsEqual(unsigned uf, unsigned ug) {
-    int sign_mask = 1 << 31;
+    // int sign_mask = 0x80000000;
+    int frac_mask = 0X7FFFFF;
+    int frac_f = uf & frac_mask;
+    int frac_g = ug & frac_mask;
 
-    int frac_mask = (1 << 23) + ~0;
-    int frac_f = (int)uf & frac_mask;
-    int frac_g = (int)ug & frac_mask;
-
-    int expo_mask = ((1 << 8) + ~0) << 23;
-    int expo_f = (int)uf & expo_mask;
-    int expo_g = (int)ug & expo_mask;
+    int expo_mask = 0x7F800000;
+    int expo_f = uf & expo_mask;
+    int expo_g = ug & expo_mask;
 
     // nan
     if ((expo_f == expo_mask && frac_f) || (expo_g == expo_mask && frac_g))
@@ -326,7 +325,7 @@ int floatIsEqual(unsigned uf, unsigned ug) {
         return 1;
 
     // -0 == +0
-    int frac_expo_mask = ~0 + sign_mask;
+    int frac_expo_mask = 0x7FFFFFFF;
     int frac_expo_f = frac_expo_mask & uf;
     int frac_expo_g = frac_expo_mask & ug;
     if (!frac_expo_f && !frac_expo_g)
@@ -334,6 +333,7 @@ int floatIsEqual(unsigned uf, unsigned ug) {
 
     return 0;
 }
+
 /*
  * floatScale2 - Return bit-level equivalent of expression 2*f for
  *   floating point argument f.
