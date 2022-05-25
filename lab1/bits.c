@@ -383,5 +383,57 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 unsigned floatUnsigned2Float(unsigned u) {
-    return 2;
+    // 0
+    if (!u)
+        return u;
+
+    // expo
+    unsigned tmp = u;
+    int expo = 0;
+    int pos = 0;
+    while (tmp) {
+        if (tmp & 0x1)
+            expo = pos;
+
+        ++pos;
+        tmp >>= 1;
+    }
+
+    // clear the first digit
+    u &= (1 << expo) ^ 0xFFFFFFFF;
+    // printf("expo: %d\n", expo);
+
+    // frac
+    unsigned frac = 0;
+    // round u to 23 bits
+    if (expo > 23) {
+        int n = expo - 23; // number of digits to remove
+        unsigned guard_mask = (1 << n);
+        unsigned round_mask = guard_mask >> 1;
+        unsigned sticky_mask = round_mask + 0xFFFFFFFF;
+
+        // printf("guard mask:  0x%x\n", guard_mask);
+        // printf("round mask:  0x%x\n", round_mask);
+        // printf("sticky mask: 0x%x\n", sticky_mask);
+
+        int guard = u & guard_mask;
+        int round = u & round_mask;
+        int sticky = u & sticky_mask;
+
+        // printf("guard:  0x%x\n", guard);
+        // printf("round:  0x%x\n", round);
+        // printf("sticky: 0x%x\n", sticky);
+
+        // round up
+        if ((round && sticky) || (round && guard && !sticky)) {
+            u += guard_mask;
+            // printf("Round up\n");
+        }
+
+        frac = (u & ~(round_mask + 0xFFFFFFFF)) >> n;
+        // printf("frac: 0x%x\n", frac);
+    } else
+        frac = u << (23 - expo);
+
+    return ((expo + 127) << 23) | frac;
 }
