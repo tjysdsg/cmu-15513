@@ -399,10 +399,6 @@ unsigned floatUnsigned2Float(unsigned u) {
         tmp >>= 1;
     }
 
-    // clear the first digit
-    u &= (1 << expo) ^ 0xFFFFFFFF;
-    // printf("expo: %d\n", expo);
-
     // frac
     unsigned frac = 0;
     // round u to 23 bits
@@ -412,28 +408,28 @@ unsigned floatUnsigned2Float(unsigned u) {
         unsigned round_mask = guard_mask >> 1;
         unsigned sticky_mask = round_mask + 0xFFFFFFFF;
 
-        // printf("guard mask:  0x%x\n", guard_mask);
-        // printf("round mask:  0x%x\n", round_mask);
-        // printf("sticky mask: 0x%x\n", sticky_mask);
-
         int guard = u & guard_mask;
         int round = u & round_mask;
         int sticky = u & sticky_mask;
 
-        // printf("guard:  0x%x\n", guard);
-        // printf("round:  0x%x\n", round);
-        // printf("sticky: 0x%x\n", sticky);
-
         // round up
-        if ((round && sticky) || (round && guard && !sticky)) {
-            u += guard_mask;
-            // printf("Round up\n");
+        // if ((round && sticky) || (round && guard && !sticky)) {
+        if ((round && sticky) || (round && guard)) {
+            unsigned _u = u + guard_mask;
+
+            // if rounding up added a digit
+            // if (u & 1L << (expo + 1)) // can't do this because overflow
+            int mask = 1 << expo;
+            if ((u & mask) != (_u & mask))
+                ++expo;
+            u = _u;
         }
 
-        frac = (u & ~(round_mask + 0xFFFFFFFF)) >> n;
-        // printf("frac: 0x%x\n", frac);
+        // calculate frac based on current expo (rounding up might add a digit)
+        frac = u >> (expo - 23);
     } else
         frac = u << (23 - expo);
 
+    frac &= 0x7FFFFF;
     return ((expo + 127) << 23) | frac;
 }
