@@ -248,7 +248,48 @@ long isLess(long x, long y) {
  *   Rating: 4
  */
 long leftBitCount(long x) {
-    return 2L;
+    x = ~x;
+    long special_case = !x;
+
+    // below is the same as integerLog2
+    long ret = 0;
+    long in_range, n_bits;
+
+    long mask1 = (0xFFL << 56) | // 0xFFFFFFFF00000000L
+                 (0xFFL << 48) | (0xFFL << 40) | (0xFFL << 32);
+    long mask2 = (0xFFL << 24) | (0xFFL << 16); // 0xFFFF0000
+    long mask3 = 0xFFL << 8;                    // 0xFF00
+
+    in_range = !!(x & mask1);
+    n_bits = in_range << 5;
+    x >>= n_bits;
+    ret += n_bits;
+
+    in_range = !!(x & mask2);
+    n_bits = in_range << 4;
+    x >>= n_bits;
+    ret += n_bits;
+
+    in_range = !!(x & mask3);
+    n_bits = in_range << 3;
+    x >>= n_bits;
+    ret += n_bits;
+
+    in_range = !!(x & 0xF0);
+    n_bits = in_range << 2;
+    x >>= n_bits;
+    ret += n_bits;
+
+    in_range = !!(x & 0xC);
+    n_bits = in_range << 1;
+    x >>= n_bits;
+    ret += n_bits;
+
+    in_range = !!(x & 0x2);
+    ret += in_range;
+
+    // return 63 - ret + special_case;
+    return 64 + ~ret + special_case;
 }
 
 /*
