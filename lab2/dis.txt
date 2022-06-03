@@ -622,26 +622,32 @@ void phase_5(const char* s) {
   401313:	c3                   	retq
 
 
+/* the input is a permutation array (1-based) that sorts:
+ *   1.   0x4d
+ *   2.   0x3a
+ *   3.   0x77
+ *   4.   0x58
+ *   5.   0x74
+ *   6.   0x62
+ * which is 2 1 4 6 5 3
+*/
 void phase_6(const char* s) {
     long long* nums = rsp + 0x30; // size 6
 
     rax = read_six_numbers(s, nums);
 
-    // 6 numbers, all num in nums <= 5, all of them unequal
-    rbp = 0;
-    while (rbp <= 5) {
+    // 6 numbers, all num in 0 < nums <= 6, all of them unequal
+    for (rbp = 0; rbp <= 5; ++rbp) {
         rax -= 1;
         if ((unsigned) rax > 5) explode_bomb();
 
-        r12 = rbp + 1;
-        rbx = r12;
+        rbx = rbp + 1;
         while (rbx <= 5) {
             rax = nums[rbx];
             if (rax != nums[rbp]) {
                 rbx += 1;
             } else explode_bomb();
         }
-        rbp = r12;
     }
 
     /*
@@ -659,23 +665,21 @@ void phase_6(const char* s) {
     0x6043e0 <node6>:       0x62      6
     0x6043f0 <node6+16>:    0      0
     */
-    // arr contains an array of addresses, 0x604340 to 0x6043e0
+    // arr contains an array of addresses, 0x604340, ..50, to ..d0
     long long* arr = rsp; // size 6
-    rcx = 0;
-    while (rcx <= 5) {
+    for (rcx = 0; rcx <= 5; ++rcx) {
         rdx = 0x604340;
+
         rax = 1;
         while (nums[rcx] > rax) {
             rdx = *(rdx + 0x10);
             rax += 1;
         }
         arr[rcx] = rdx;
-        rcx += 1;
     }
 
-    rbx = arr[0]; // one of the addresses stored in arr
-
-    // modifies the values stored in 0x604340 to 0x6043e0 to match arr[i]
+    // 0x604340, ..50, to ..d0 <- arr
+    rbx = arr[0];
     rcx = arr[0];
     for(int rax = 1; rax <= 5; ++i) {
         rdx = arr[rax];
@@ -683,6 +687,15 @@ void phase_6(const char* s) {
         rcx = rdx;
     }
 
+    *(rcx + 0x10) = 0; // the end of the linked list
+
+    // check if sorted
+    for (rbp = 0; rbp <= 4; ++rbp) {
+        rax = *(rbx + 0x10);
+        rax = *rax;
+        if (*rbx > rax) explode_bomb();
+        rbx = *(0x10 + rbx);
+    }
 }
 0000000000401314 <phase_6>:
   401314:	push   %r12
@@ -750,20 +763,21 @@ void phase_6(const char* s) {
   4013bb:	cmp    $0x5,%rax // rax <= 5
   4013bf:	jle    4013ac <phase_6+0x98>
 
-  4013c1:	movq   $0x0,0x10(%rcx)
+  4013c1:	movq   $0x0,0x10(%rcx)   // *(rcx + 0x10) = 0
   4013c8:
-  4013c9:	mov    $0x0,%ebp
+  4013c9:	mov    $0x0,%ebp         // rbp = 0
   4013ce:	jmp    4013e9 <phase_6+0xd5>
-  4013d0:	mov    0x10(%rbx),%rax
-  4013d4:	mov    (%rax),%rax
-  4013d7:	cmp    %rax,(%rbx)
+
+  4013d0:	mov    0x10(%rbx),%rax // rax = *(0x10 + rbx)
+  4013d4:	mov    (%rax),%rax     // rax = *rax
+  4013d7:	cmp    %rax,(%rbx)     // *rbx <= rax
   4013da:	jle    4013e1 <phase_6+0xcd>
 
   4013dc:	callq  40197f <explode_bomb>
 
-  4013e1:	mov    0x10(%rbx),%rbx
-  4013e5:	add    $0x1,%rbp
-  4013e9:	cmp    $0x4,%rbp
+  4013e1:	mov    0x10(%rbx),%rbx // rbx = *(0x10 + rbx)
+  4013e5:	add    $0x1,%rbp       // rbp += 1
+  4013e9:	cmp    $0x4,%rbp  // rbp <= 4
   4013ed:	jle    4013d0 <phase_6+0xbc>
 
   4013ef:	add    $0x60,%rsp
