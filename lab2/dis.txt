@@ -623,7 +623,7 @@ void phase_5(const char* s) {
 
 
 void phase_6(const char* s) {
-    long long* nums = rsp + 0x30;
+    long long* nums = rsp + 0x30; // size 6
 
     rax = read_six_numbers(s, nums);
 
@@ -643,6 +643,46 @@ void phase_6(const char* s) {
         }
         rbp = r12;
     }
+
+    /*
+    (gdb)
+    0x604340 <node1>:       0x4d      1
+    0x604350 <node1+16>:    0x604360  0
+    0x604360 <node2>:       0x3a      2
+    0x604370 <node2+16>:    0x604380  0
+    0x604380 <node3>:       0x77      3
+    0x604390 <node3+16>:    0x6043a0  0
+    0x6043a0 <node4>:       0x58      4
+    0x6043b0 <node4+16>:    0x6043c0  0
+    0x6043c0 <node5>:       0x74      5
+    0x6043d0 <node5+16>:    0x6043e0  0
+    0x6043e0 <node6>:       0x62      6
+    0x6043f0 <node6+16>:    0      0
+    */
+    // arr contains an array of addresses, 0x604340 to 0x6043e0
+    long long* arr = rsp; // size 6
+    rcx = 0;
+    while (rcx <= 5) {
+        rdx = 0x604340;
+        rax = 1;
+        while (nums[rcx] > rax) {
+            rdx = *(rdx + 0x10);
+            rax += 1;
+        }
+        arr[rcx] = rdx;
+        rcx += 1;
+    }
+
+    rbx = arr[0]; // one of the addresses stored in arr
+
+    // modifies the values stored in 0x604340 to 0x6043e0 to match arr[i]
+    rcx = arr[0];
+    for(int rax = 1; rax <= 5; ++i) {
+        rdx = arr[rax];
+        *(rcx + 0x10) = rdx;
+        rcx = rdx;
+    }
+
 }
 0000000000401314 <phase_6>:
   401314:	push   %r12
@@ -694,20 +734,20 @@ void phase_6(const char* s) {
   40138e:	jg     401375 <phase_6+0x61>
 
   401390:	mov    %rdx,(%rsp,%rcx,8)  // *(rsp + rcx*8) = rdx
-  401394:	add    $0x1,%rcx           // rcx = 1
+  401394:	add    $0x1,%rcx           // rcx += 1
   401398:	cmp    $0x5,%rcx  // rcx <= 5
   40139c:	jle    40137f <phase_6+0x6b>
 
-  40139e:	mov    (%rsp),%rbx
-  4013a2:	mov    %rbx,%rcx
-  4013a5:	mov    $0x1,%eax
+  40139e:	mov    (%rsp),%rbx  // rbx = *rsp
+  4013a2:	mov    %rbx,%rcx    // rcx = rbx
+  4013a5:	mov    $0x1,%eax    // eax = 1
   4013aa:	jmp    4013bb <phase_6+0xa7>
 
-  4013ac:	mov    (%rsp,%rax,8),%rdx
-  4013b0:	mov    %rdx,0x10(%rcx)
-  4013b4:	add    $0x1,%rax
-  4013b8:	mov    %rdx,%rcx
-  4013bb:	cmp    $0x5,%rax
+  4013ac:	mov    (%rsp,%rax,8),%rdx  // rdx = *(rsp + rax*8)
+  4013b0:	mov    %rdx,0x10(%rcx)     // *(rcx + 0x10) = rdx
+  4013b4:	add    $0x1,%rax           // rax += 1
+  4013b8:	mov    %rdx,%rcx           // rcx = rdx
+  4013bb:	cmp    $0x5,%rax // rax <= 5
   4013bf:	jle    4013ac <phase_6+0x98>
 
   4013c1:	movq   $0x0,0x10(%rcx)
