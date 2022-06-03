@@ -567,27 +567,57 @@ void phase_4(const char* s) {
   4012c2:	add    $0x18,%rsp
   4012c6:	retq
 
+void phase_5(const char* s) {
+    int n = string_length(s);
+    if (n != 6) explode_bomb();
+
+    int arr[] = {
+        2   10
+        6   1
+        12  0
+        9   3
+        4   7
+        14  5
+        11  8
+        15  13
+    }
+    int rdx = 0;
+    for (int rax = 0; rax <= 5; ++rax) {
+        rdx <<= 4;
+        rdx += arr[s[rax] & 0xF];
+    }
+    if (rdx != 0x824962) explode_bomb(); // 0b1000 0010 0100 1001 0110 0010
+    // if no overflow, indices are {13 0 8 6 2 0}
+    // ascii (with lower 4 bits matching the indices) = "=08620"
+}
 00000000004012c7 <phase_5>:
   4012c7:	53                   	push   %rbx
-  4012c8:	48 89 fb             	mov    %rdi,%rbx
+  4012c8:	48 89 fb             	mov    %rdi,%rbx  // rbx = rdi
   4012cb:	e8 84 04 00 00       	callq  401754 <string_length>
-  4012d0:	48 83 f8 06          	cmp    $0x6,%rax
+  4012d0:	48 83 f8 06          	cmp    $0x6,%rax  // rax == 6
   4012d4:	74 05                	je     4012db <phase_5+0x14>
+
   4012d6:	e8 a4 06 00 00       	callq  40197f <explode_bomb>
-  4012db:	ba 00 00 00 00       	mov    $0x0,%edx
-  4012e0:	b8 00 00 00 00       	mov    $0x0,%eax
+
+  4012db:	ba 00 00 00 00       	mov    $0x0,%edx  // edx = 0
+  4012e0:	b8 00 00 00 00       	mov    $0x0,%eax  // eax = 0
   4012e5:	eb 17                	jmp    4012fe <phase_5+0x37>
-  4012e7:	48 c1 e2 04          	shl    $0x4,%rdx
-  4012eb:	0f b6 0c 03          	movzbl (%rbx,%rax,1),%ecx
-  4012ef:	83 e1 0f             	and    $0xf,%ecx
-  4012f2:	48 03 14 cd 80 2b 40 	add    0x402b80(,%rcx,8),%rdx
+
+  4012e7:	48 c1 e2 04          	shl    $0x4,%rdx  // rdx <<= 4
+  4012eb:	0f b6 0c 03          	movzbl (%rbx,%rax,1),%ecx  // ecx = *(rbx + rax)
+  4012ef:	83 e1 0f             	and    $0xf,%ecx  // ecx &= 0xF
+  4012f2:	48 03 14 cd 80 2b 40 	add    0x402b80(,%rcx,8),%rdx  // rdx += *(0x402b80 + rcx * 8)
   4012f9:	00
-  4012fa:	48 83 c0 01          	add    $0x1,%rax
-  4012fe:	48 83 f8 05          	cmp    $0x5,%rax
+  4012fa:	48 83 c0 01          	add    $0x1,%rax  // rax += 1
+
+  4012fe:	48 83 f8 05          	cmp    $0x5,%rax  // rax <= 5
   401302:	7e e3                	jle    4012e7 <phase_5+0x20>
-  401304:	48 81 fa 62 49 82 00 	cmp    $0x824962,%rdx
+
+  401304:	48 81 fa 62 49 82 00 	cmp    $0x824962,%rdx  // rdx == 0x824962
   40130b:	74 05                	je     401312 <phase_5+0x4b>
+
   40130d:	e8 6d 06 00 00       	callq  40197f <explode_bomb>
+
   401312:	5b                   	pop    %rbx
   401313:	c3                   	retq
 
