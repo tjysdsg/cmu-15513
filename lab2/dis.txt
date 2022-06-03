@@ -390,44 +390,87 @@ void phase_2(const char* s) {
   40118d:  pop    %rbx
   40118e:  retq
 
+void phase_3(const char* s) {
+    int n = sscanf(s, "%ld %ld", rsp + 8, rsp);
+    if (n <= 1) explode_bomb();
+
+    n = *(rsp + 8) - 3;
+    if ((unsigned) n > 7) explode_bomb();
+
+    switch (n) {
+    case 0:
+        n = 0x57;
+    case 1:
+        n = 0x61;
+    case 2:
+        n = 0x27;
+    case 3:
+        n = 0x6a;
+    case 5:
+        n = 0x64;
+    case 6:
+        n = 0x6e;
+    case 7:
+        n = 0x34;
+    case 8:
+        n = 0x42;
+    }
+
+    if (n != *rsp) explode_bomb();
+}
 000000000040118f <phase_3>:
-  40118f:	48 83 ec 18          	sub    $0x18,%rsp
-  401193:	48 89 e1             	mov    %rsp,%rcx
-  401196:	48 8d 54 24 08       	lea    0x8(%rsp),%rdx
-  40119b:	be 78 30 40 00       	mov    $0x403078,%esi
-  4011a0:	b8 00 00 00 00       	mov    $0x0,%eax
-  4011a5:	e8 96 fb ff ff       	callq  400d40 <__isoc99_sscanf@plt>
-  4011aa:	83 f8 01             	cmp    $0x1,%eax
-  4011ad:	7f 05                	jg     4011b4 <phase_3+0x25>
-  4011af:	e8 cb 07 00 00       	callq  40197f <explode_bomb>
-  4011b4:	48 8b 44 24 08       	mov    0x8(%rsp),%rax
-  4011b9:	48 83 e8 03          	sub    $0x3,%rax
-  4011bd:	48 83 f8 07          	cmp    $0x7,%rax
-  4011c1:	77 38                	ja     4011fb <phase_3+0x6c>
-  4011c3:	ff 24 c5 40 2b 40 00 	jmpq   *0x402b40(,%rax,8)
-  4011ca:	b8 57 00 00 00       	mov    $0x57,%eax
-  4011cf:	eb 3b                	jmp    40120c <phase_3+0x7d>
-  4011d1:	b8 61 00 00 00       	mov    $0x61,%eax
-  4011d6:	eb 34                	jmp    40120c <phase_3+0x7d>
-  4011d8:	b8 27 00 00 00       	mov    $0x27,%eax
-  4011dd:	eb 2d                	jmp    40120c <phase_3+0x7d>
-  4011df:	b8 6a 00 00 00       	mov    $0x6a,%eax
-  4011e4:	eb 26                	jmp    40120c <phase_3+0x7d>
-  4011e6:	b8 64 00 00 00       	mov    $0x64,%eax
-  4011eb:	eb 1f                	jmp    40120c <phase_3+0x7d>
-  4011ed:	b8 6e 00 00 00       	mov    $0x6e,%eax
-  4011f2:	eb 18                	jmp    40120c <phase_3+0x7d>
-  4011f4:	b8 34 00 00 00       	mov    $0x34,%eax
-  4011f9:	eb 11                	jmp    40120c <phase_3+0x7d>
-  4011fb:	e8 7f 07 00 00       	callq  40197f <explode_bomb>
-  401200:	b8 00 00 00 00       	mov    $0x0,%eax
-  401205:	eb 05                	jmp    40120c <phase_3+0x7d>
-  401207:	b8 42 00 00 00       	mov    $0x42,%eax
-  40120c:	48 3b 04 24          	cmp    (%rsp),%rax
-  401210:	74 05                	je     401217 <phase_3+0x88>
-  401212:	e8 68 07 00 00       	callq  40197f <explode_bomb>
-  401217:	48 83 c4 18          	add    $0x18,%rsp
-  40121b:	c3                   	retq
+  40118f: sub    $0x18,%rsp
+  401193: mov    %rsp,%rcx        // rcx = rsp
+  401196: lea    0x8(%rsp),%rdx   // rdx = rsp + 8
+  40119b: mov    $0x403078,%esi   // esi = "%ld %ld"
+  4011a0: mov    $0x0,%eax        // eax = 0
+  4011a5: callq  400d40 <__isoc99_sscanf@plt>
+  4011aa: cmp    $0x1,%eax               // if (eax > 1)
+  4011ad: jg     4011b4 <phase_3+0x25>
+  4011af: callq  40197f <explode_bomb>
+  4011b4: mov    0x8(%rsp),%rax   // rax = *(rsp + 8)
+  4011b9: sub    $0x3,%rax        // rax -= 3
+  4011bd: cmp    $0x7,%rax        // if ((unsigned) rax <= 7)
+  4011c1: ja     4011fb <phase_3+0x6c>
+  4011c3: jmpq   *0x402b40(,%rax,8)
+  // jump table:
+  // 0x402b40:       0x00000000004011ca      0x0000000000401207
+  // 0x402b50:       0x00000000004011d1      0x00000000004011d8
+  // 0x402b60:       0x00000000004011df      0x00000000004011e6
+  // 0x402b70:       0x00000000004011ed      0x00000000004011f4
+
+  4011ca: mov    $0x57,%eax
+  4011cf: jmp    40120c <phase_3+0x7d>
+
+  4011d1: mov    $0x61,%eax
+  4011d6: jmp    40120c <phase_3+0x7d>
+
+  4011d8: mov    $0x27,%eax
+  4011dd: jmp    40120c <phase_3+0x7d>
+
+  4011df: mov    $0x6a,%eax
+  4011e4: jmp    40120c <phase_3+0x7d>
+
+  4011e6: mov    $0x64,%eax
+  4011eb: jmp    40120c <phase_3+0x7d>
+
+  4011ed: mov    $0x6e,%eax
+  4011f2: jmp    40120c <phase_3+0x7d>
+
+  4011f4: mov    $0x34,%eax
+  4011f9: jmp    40120c <phase_3+0x7d>
+
+  4011fb: callq  40197f <explode_bomb>
+  401200: mov    $0x0,%eax
+  401205: jmp    40120c <phase_3+0x7d>
+
+  401207: mov    $0x42,%eax
+
+  40120c: cmp    (%rsp),%rax  // rax == *rsp
+  401210: je     401217 <phase_3+0x88>
+  401212: callq  40197f <explode_bomb>
+  401217: add    $0x18,%rsp
+  40121b: retq
 
 000000000040121c <func4>:
   40121c:	48 83 ec 08          	sub    $0x8,%rsp
