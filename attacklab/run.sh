@@ -1,2 +1,2 @@
-./hex2raw phase3.txt phase3-raw.txt
-./ctarget -i phase3-raw.txt
+./hex2raw phase4.txt phase4-raw.txt
+./rtarget -i phase4-raw.txt
