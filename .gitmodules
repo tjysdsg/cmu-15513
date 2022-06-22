@@ -1,3 +1,6 @@
 [submodule "cachelab"]
 	path = cachelab
 	url = git@github.com:cmu15213-m22/cachelab--tjysdsg.git
+[submodule "malloclab"]
+	path = malloclab
+	url = git@github.com:cmu15213-m22/malloclab-513-tjysdsg.git
