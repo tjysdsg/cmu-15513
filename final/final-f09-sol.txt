@@ -1,0 +1,211 @@
+Final
+Solutions
+15-213/18-243 Fall 2009
+
+*********
+Problem 1
+*********
+
+1. c
+2. a and d
+3. b
+4. a
+5. c
+6. b
+
+*********
+Problem 2
+*********
+
+VA_GET_PPO: (virtual & 0xfff)
+VA_GET_PTI: ((virtual >> 12) & 0x3ff)
+VA_GET_PDI: ((virtual >> 22) & 0x3ff)
+PDE_GET_PTBA: (pde & 0xfffff000)
+PTE_GET_PBA: (pde & 0xfffff000)
+IS_PRESENT: (pte & 0x1)
+IS_WRITABLE: ((pte & 0x2) >> 1)
+SET_PRESENT: (((pte >> 1) << 1) + pres)
+SET_WRITABLE: ((pte & 0x1) + ((pte >> 2) << 2) + (write << 1))
+
+*********
+Problem 3
+*********
+
+A. pushes return address onto stack
+B. moves the stack frame up to previous function (mov %ebp, %esp; pop %ebp)
+C. pops return address off stack
+D. pushed onto stack in reverse order (e.g., push arg3, push arg2, push arg1)
+E. in the %eax register
+F.
++-------------------------------------+
+|         callee stack frame          |
++-------------------------------------+
+|         0xbeefbabe                  |  Stack Growing Down! |
++-------------------------------------+			     V        
+|	  0x5              	      |
++-------------------------------------+
+|	  0xcafebeef                  |
++-------------------------------------+
+|	  return address              |
++-------------------------------------+
+|	  old ebp                     |
++-------------------------------------+
+|	  printf stack frame          |
+
+G. value of fd might change before the new thread accesses it, because it
+   is on the creating thread's stack.
+
+
+*********
+Problem 4
+*********
+
+A. 0
+B. 0, 5, 10, 15
+
+
+*********
+Problem 5
+*********
+
+A. If any of the mallocs fail, other than the first one, memory allocated
+   in the function will be leaked.
+
+B.
+   struct cache_entry *entry = malloc(sizeof(struct cache_entry));
+   if (!entry)
+      goto L1;  /* (or "return NULL") */
+   entry->url = malloc(url_length+1);
+   if (!entry->url)
+      goto L2;
+   entry->browser_signature = malloc(signature_length+1);
+   if (!entry->browser_signature)
+      goto L3;
+   entry->http_referrer = malloc(referrer_length+1);
+   if (!entry->http_referrer)
+      goto L4;
+   entry->content = malloc(content_length+1);
+   if (!entry->content)
+      goto L5;
+   return entry;
+L5:
+   free(entry->http_referrer);
+L4:
+   free(entry->browser_signature);
+L3:
+   free(entry->url);
+L2:
+   free(entry);
+L1:
+   return NULL;
+
+
+*********
+Problem 6
+*********
+
+A.
+
+  Server  |  Client
+---------------------
+ socket   |
+ bind     |
+ listen   |
+ accept   |
+          | socket
+          | connect
+ read     | 
+          | write
+          | close
+
+
+B. recv (like read) is not guaranteed to read a full 4096 bytes (i.e., it
+   can return less as a "short read").  It needs to be placed in a loop.
+
+
+*********
+Problem 7
+*********
+
+2^52
+add
+2^52
+lower 32 bits
+to the nearest even
+
+
+*********
+Problem 8
+*********
+
+A. 3
+B. No
+C. 18243
+D. No
+
+
+*********
+Problem 9
+*********
+
+A. none
+B. mutex
+C. none
+D. rwlock
+E. sem(7)
+F. condvar
+G. sem(0)
+
+
+**********
+Problem 10
+**********
+
+A. id_from = id_to
+B. Deadlock is possible with any concurrent circular transfers
+   (e.g., transfer_dollar(A, B) and transfer_dollar(B, A))
+
+
+**********
+Problem 11
+**********
+
+A. 1115
+B. 11121
+
+
+**********
+Problem 12
+**********
+
+A. There is no check for an overflow! The if(a+b <0) statement does not
+appear in the assembly code. Nor does the printf or a jump out of the
+for loop.  
+
+B. Newer versions of gcc take advantage of the "total license" policy
+within the C standard, which states that any undefined behavior can be
+assumed to never occur, and optimizations can be made off of this fact.
+Signed integer overflow in the C language is undefined, and therefore
+newer versions of gcc believe that it cannot occur and will make
+optimizations with that in mind.  Because integer overflow "can never
+occur", the compiler has kindly removed the if statement.  
+
+C. After the call to printf, insert the following lines of assembly:
+    cmp $0,%ebx
+    jle 8048397 <main+0x17>
+    push &"Overflow!, stopping\n"
+    jmp <end of the function>
+
+
+**********
+Problem 13
+**********
+
+A. Dannenberg
+B. Ganger
+C. 4 (SS, BB, TT, GG)
+D. 32
+E. my artistic skills cannot be properly conveyed in text, but ancient
+   artists are blushing.
+
+

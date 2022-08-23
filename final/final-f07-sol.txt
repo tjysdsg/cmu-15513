@@ -1,0 +1,158 @@
+15-213, Fall 2007
+Final Exam Solutions
+
+Q1.
+
+Part I.
+
+A(a):  0 110 1111 (largest finite positive value)
+
+A(b): X_A < X_B (since X_B can store larger exponents)
+
+B(a): 1 0000 001 (smallest denormalized value with a negative sign bit)
+
+B(b): Y_A < Y_B (since format B can represent values closer to 0, and both
+                 are negative).
+
+
+Part II.
+
+1 011 1010    -13/8     1 0111 101    -13/8
+0 101 0011    19/4*     0 1001 010*    5*
+1 000 1100    -3/16*    1 0100 100*    -3/16*
+0 110 1000*    12       0 1010 100*    12
+0 100 1010*    13/4     0 1000 101*    13/4
+
+* = filled-in blank
+
+
+Q2.
+
+yes
+yes
+no
+no
+
+explodes
+defuses
+defuses
+explodes
+
+Q3.
+
+A.
+
+44
+
+B.
+
+8
+36
+
+C.
+
+20
+16
+12
+
+D.
+
+0
+8
+0
+
+Q4.
+
+2
+3
+CBDE
+
+Q5.
+
+12.5%
+25%
+25%
+
+Q6.
+
+A:
+   Address: 0x8BEEFCDC
+   Fault: No
+
+B:
+   Address: 0x024C8320
+   Fault: No
+
+C:
+   Address: 0x00100008
+   Fault: Yes
+   Reason: Write bit not set in the data field
+
+D:
+   Address: 0x01000478
+   Fault: No
+
+
+Q7.
+
+C
+A
+A
+AB
+---
+ADH
+B
+---
+BC
+B
+B
+---
+B 
+
+Q8.
+
+The following 3 are legal:
+ABBCE4E
+ABs7E
+ABCBs7E
+
+Q9.
+
+(semaphores are interchangable)
+ s1 = 3, s2 = 2, s3 = 1, s4 = 1
+ 1)
+ thread1()             thread2()           thread3()
+ {                     {                   {
+   while (x!=360){       while (x!=360){     while (x!=360){
+     P(s1);                P(s2);              P(s3);
+     P(s4);                P(s4);              P(s4);
+     x = x * 2;            x = x * 3;          x = x * 5;
+     V(s4);                V(s4);              V(s4);
+   }                     }                   }
+   exit(0);              exit(0);            exit(0);
+ }                     }                   }
+
+ Note: using s4 as lock and s1-s3 as iterators (and block all but the last
+ one thru.
+
+
+Q10.
+
+A.
+
+foo
+bar
+
+B.
+
+(a) no
+(b) between 0 and N
+(c) maybe
+
+C.
+
+2^48
+
+D.
+
+2^64

@@ -1,0 +1,88 @@
+15-213, Spring 2008
+Final Exam Solutions
+
+Q1.
+1.
+(a) 0x0x0130
+(b) 0x210C
+(c) 0x3A72 
+(d) (Success)
+
+2.
+(a) 0x019C 
+(b) 0x1214 
+(c) 0x27CF
+(d) Page not writable
+
+
+Q2.
+
+0 1100 0000000 : 32
+1 0010 0001110 : ------
+1 1110 1111111 : -255
++inf
+3/512
+255/32
+
+Q3.
+
+int foo(struct Node* t, unsigned int* v) {
+  if(t == NULL)  return 0;
+  if(*v == t->index) {
+    return (*v + (t -> value[(*v) +1]));
+  }
+  return (foo(t->left, v)? *v : foo(t->right, v));
+}
+
+Q4.
+
+src: 0x1ff3   
+dest: 0xbffff918
+arg1: 0xbffff900
+arg2: 0xbffff904
+arg3: 0xbffff908
+return addres: ADDRESS is BFFFF8FC, VALUE (partial credit) is 0xb1fba
+old ebp: ADDRESS is BFFFF8F8, VALUE (partial credit) is 0xbffff938
+
+Q5.
+
+A = 5
+B = 9
+uni = 5208
+
+Q6.
+
+(a)
+  (16*1024 byte/cache) * (1 line / 64 byte) = 256 line/cache
+  (256 line/cache)*(1 set/4 line) = [64 set/cache]
+(b)
+  We never read anything twice, so cache size doesn't matter
+  Cache can handle 4 "streams", we have only 2 streams
+  Doubles are 8 bytes
+  Lines are 64 bytes
+  So each stream misses 1 time in 8
+  So miss rate is 1/8 or 12.5%
+(c)
+  We never read anything twice, so cache size doesn't matter
+  Cache can handle 4 "streams", we have only 1 stream
+  Doubles are 8 bytes
+  Lines are 64 bytes
+  So the stream misses 1 time in 16
+  So miss rate is 1/16 or 6.25%
+
+Q7.
+ 1 = u
+2 = s
+ 3 = r
+ 4 = u
+ 5 = c
+ 6 = e
+
+Q8.
+
+correct: C, D, E, and G
+
+Q9.
+
+(1) yes, if the 2nd thread gets the lock first, it kills itself while holding the lock.
+(2) yes, classic deadlock from acquiring locks in different order
