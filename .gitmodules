@@ -6,7 +6,7 @@
 	url = git@github.com:cmu15213-m22/malloclab-513-tjysdsg.git
 [submodule "tshlab"]
 	path = tshlab
-	url = ssh://git@ssh.github.com:443/cmu15213-m22/tshlab-513-tjysdsg
+	url = git@github.com:cmu15213-m22/tshlab-513-tjysdsg
 [submodule "proxylab"]
 	path = proxylab
 	url = git@github.com:cmu15213-m22/proxylab-513-tjysdsg.git
