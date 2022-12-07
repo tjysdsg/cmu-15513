@@ -1,0 +1,29 @@
+cmake-build-*
+.idea/
+
+# Temporary files
+*~
+._*
+core
+*.dSYM
+*.swp
+
+# Intermediate compilation output
+*.o
+*.bc
+*.ll
+!/ct/*.bc
+
+# Target files
+/test-csim
+/csim
+/test-trans
+/test-trans-simple
+/tracegen-ct
+/cachelab-handin.tar
+/.selected_course.txt
+
+# csim nonsense
+/.csim_results
+/.marker
+/trace.*
